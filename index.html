@@ -203,9 +203,35 @@ function processCommand(command) {
     speak("Entering standby mode. Goodbye.");
   }
 
-  else {
-    speak("I have not learned that command yet. We will upgrade my intelligence soon.");
-  }
+  
+else {
+  speak("Certainly. Let me think.");
+
+  fetch("https://jolly-sea-b0ee.vishalkamila138.workers.dev", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: command
+    })
+  })
+  .then(async response => {
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Request failed");
+    }
+    return data;
+  })
+  .then(data => {
+    speak(data.reply || "I have no response.");
+  })
+  .catch(error => {
+    console.error(error);
+    speak("Sorry, my AI connection is unavailable.");
+  });
+}
+
 }
 </script>
 

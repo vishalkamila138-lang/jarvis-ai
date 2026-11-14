@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS AI</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #050b16;
+  color: #d8f5ff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+h1 {
+  letter-spacing: 8px;
+  color: #42dfff;
+  text-shadow: 0 0 18px #00bfff;
+}
+
+#status {
+  color: #8baabd;
+  margin: 12px;
+}
+
+#orb {
+  width: 190px;
+  height: 190px;
+  border: 3px solid #32dfff;
+  border-radius: 50%;
+  margin: 28px auto;
+  display: grid;
+  place-items: center;
+  font-size: 58px;
+  box-shadow: 0 0 25px #008cff,
+              inset 0 0 25px #008cff;
+}
+
+#orb.active {
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 55px #00d9ff,
+                inset 0 0 40px #00aaff;
+  }
+}
+
+button {
+  background: #063e61;
+  color: white;
+  border: 1px solid #35dfff;
+  padding: 15px 28px;
+  border-radius: 30px;
+  font-size: 16px;
+  margin: 8px;
+}
+
+#reply {
+  margin-top: 25px;
+  max-width: 350px;
+  line-height: 1.6;
+  min-height: 50px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>J.A.R.V.I.S.</h1>
+<div>PERSONAL AI ASSISTANT</div>
+
+<div id="orb">◉</div>
+
+<div id="status">SYSTEM STANDBY</div>
+
+<button onclick="startListening()">
+  🎙 ACTIVATE JARVIS
+</button>
+
+<button onclick="stopListening()">
+  STOP
+</button>
+
+<div id="reply">
+  Good evening. JARVIS systems are ready.
+</div>
+
+<script>
+const statusText = document.getElementById("status");
+const reply = document.getElementById("reply");
+const orb = document.getElementById("orb");
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition;
+
+function speak(message) {
+  speechSynthesis.cancel();
+
+  const voice = new SpeechSynthesisUtterance(message);
+  voice.lang = "en-IN";
+  voice.rate = 0.95;
+
+  speechSynthesis.speak(voice);
+  reply.innerText = message;
+}
+
+function startListening() {
+  if (!SpeechRecognition) {
+    speak("Voice recognition is not supported in this browser.");
+    return;
+  }
+
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      statusText.innerText = "LISTENING...";
+      orb.classList.add("active");
+    };
+
+    recognition.onresult = (event) => {
+      const command =
+        event.results[0][0].transcript.toLowerCase();
+
+      reply.innerText = "You: " + command;
+      processCommand(command);
+    };
+
+    recognition.onerror = () => {
+      statusText.innerText = "VOICE ERROR";
+      orb.classList.remove("active");
+      reply.innerText = "I couldn't hear that. Please try again.";
+    };
+
+    recognition.onend = () => {
+      statusText.innerText = "SYSTEM STANDBY";
+      orb.classList.remove("active");
+    };
+  }
+
+  try {
+    recognition.start();
+  } catch (error) {
+    statusText.innerText = "PLEASE WAIT";
+  }
+}
+
+function stopListening() {
+  if (recognition) recognition.stop();
+  speechSynthesis.cancel();
+  orb.classList.remove("active");
+  statusText.innerText = "SYSTEM STANDBY";
+}
+
+function processCommand(command) {
+  if (command.includes("hello") ||
+      command.includes("hi jarvis")) {
+    speak("Hello. At your service.");
+  }
+
+  else if (command.includes("your name")) {
+    speak("I am JARVIS, your personal assistant.");
+  }
+
+  else if (command.includes("time")) {
+    speak("The time is " +
+      new Date().toLocaleTimeString("en-IN"));
+  }
+
+  else if (command.includes("date")) {
+    speak("Today's date is " +
+      new Date().toLocaleDateString("en-IN"));
+  }
+
+  else if (command.includes("how are you")) {
+    speak("All systems are functioning normally.");
+  }
+
+  else if (command.includes("thank you")) {
+    speak("Always happy to assist.");
+  }
+
+  else if (command.includes("shutdown")) {
+    speak("Entering standby mode. Goodbye.");
+  }
+
+  else {
+    speak("I have not learned that command yet. We will upgrade my intelligence soon.");
+  }
+}
+</script>
+
+</body>
+</html>
